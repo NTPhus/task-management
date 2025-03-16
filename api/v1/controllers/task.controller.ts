@@ -1,11 +1,66 @@
-import {Request, Response} from "express";
+import { Request, Response } from "express";
 
 import Task from "../models/task.model";
+import paginationHelper from "../../../helpers/pagination";
+import searchHelper from "../../../helpers/search";
 
-export const index =  async (req: Request, res: Response) => {
-    const tasks = await Task.find({
-        deleted: false
-    });
+export const index = async (req: Request, res: Response) => {
+    //Find
+    interface Find {
+        deleted: boolean,
+        status?: string,
+        title?: RegExp,
+    }
+
+    const find: Find = {
+        deleted: false,
+    }
+
+    if (req.query.status) {
+        find.status = req.query.status.toString();
+    }
+    //End Find
+
+    //search
+    let objectSearch = searchHelper(req.query);
+    
+      if (req.query.keyword) {
+        find.title = objectSearch.regex;
+      }
+    //end search
+
+    //Sort
+    interface Sort {
+        [key: string]: 1 | -1; // Use this to dynamically assign sort fields
+    }
+
+    const sort: Sort = {};
+
+    if (req.query.sortKey && req.query.sortValue) {
+        const sortOrder = req.query.sortValue === "asc" ? 1 : -1; // Convert to 1 or -1
+        sort[req.query.sortKey.toString()] = sortOrder; // It strictly requires numeric values—1 for ascending and -1 for descending.
+    }
+    // End Sort
+
+    //pagination
+    let initPagination = {
+        currentPage: 1,
+        limitItem: 2,
+    };
+
+    const countTask = await Task.countDocuments(find);
+    const objectPagination = paginationHelper(
+        initPagination,
+        req.query,
+        countTask
+    );
+    //end pagination
+
+    console.log(objectPagination)
+    const tasks = await Task.find(find)
+    .sort(sort)
+    .limit(objectPagination.limitItem)
+    .skip(objectPagination.skip || 0);
 
     res.json(tasks);
 }
