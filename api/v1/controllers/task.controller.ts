@@ -23,10 +23,10 @@ export const index = async (req: Request, res: Response) => {
 
     //search
     let objectSearch = searchHelper(req.query);
-    
-      if (req.query.keyword) {
+
+    if (req.query.keyword) {
         find.title = objectSearch.regex;
-      }
+    }
     //end search
 
     //Sort
@@ -58,9 +58,9 @@ export const index = async (req: Request, res: Response) => {
 
     console.log(objectPagination)
     const tasks = await Task.find(find)
-    .sort(sort)
-    .limit(objectPagination.limitItem)
-    .skip(objectPagination.skip || 0);
+        .sort(sort)
+        .limit(objectPagination.limitItem)
+        .skip(objectPagination.skip || 0);
 
     res.json(tasks);
 }
@@ -73,4 +73,30 @@ export const detail = async (req: Request, res: Response) => {
     });
 
     res.json(task);
+}
+
+export const changeStatus = async (req: Request, res: Response) => {
+    try {
+        const id: string = req.params.id;
+        const status: string = req.body.status;
+
+        await Task.updateOne(
+            {
+                _id: id,
+            },
+            {
+                status: status,
+            }
+        );
+
+        res.json({
+            code: 200,
+            message: "Cập nhật trạng thái thành công",
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Không tồn tại",
+        });
+    }
 }
