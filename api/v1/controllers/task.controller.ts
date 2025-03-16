@@ -154,19 +154,37 @@ export const changeMulti = async (req: Request, res: Response) => {
 }
 
 export const create = async (req: Request, res: Response) => {
-      try {
+    try {
         const task = new Task(req.body);
         const data = await task.save();
-    
+
         res.json({
-          code: 200,
-          data: data,
-          message: "Tạo thành công",
+            code: 200,
+            data: data,
+            message: "Tạo thành công",
         });
-      } catch (error) {
+    } catch (error) {
         res.json({
-          code: 400,
-          message: "Lỗi",
+            code: 400,
+            message: "Lỗi",
         });
-      }
+    }
+}
+
+export const edit = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id;
+
+        await Task.updateOne({ _id: id }, req.body);
+
+        res.json({
+            code: 200,
+            message: "Cập nhật thành công",
+        });
+    } catch (error) {
+        res.json({
+            code: 400,
+            message: "Lỗi",
+        });
+    }
 }
