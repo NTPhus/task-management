@@ -3,10 +3,12 @@ const router: Router = Router();
 
 import * as controller from "../controllers/user.controller";
 
+import { requireAuth } from "../middlewares/auth.middleware";
+
 router.get("/register", controller.register);
 
 router.post("/login", controller.login);
 
-router.get("/detail/:id", controller.detail);
+router.get("/detail", requireAuth, controller.detail);
 
 export const userRoutes: Router = router;
